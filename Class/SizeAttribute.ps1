@@ -8,45 +8,39 @@ class SizeAttribute : Management.Automation.ArgumentTransformationAttribute
             return $Value
         }
 
-        if ($Value -is [System.Collections.IList])
+        $Value = $Value | ForEach-Object {$_.Trim()}
+        $Value = $Value -join '..'
+
+        $OperatorPattern = '^', '(?<Operator>>|>=|<|<=)?', '(?<Size>\d+)', '(?<Multiplier>MB|GB)?', '$' -join '\s*'
+        $RangePattern = '^', '(?<Size1>\d+)', '(?<Multiplier1>MB|GB)?', '\.\.', '(?<Size1>\d+)', '(?<Multiplier2>MB|GB)?', '$' -join '\s*'
+
+        if ($Value -match $OperatorPattern)
         {
-            $Values = $Value[0, -1]
+            $Operator, $Size, $Multiplier = $Matches.Operator, $Matches.Size
+            $Size = [double]$Matches.Size * "1$($Matches.Multiplier)"
+            $Size = [Math]::Truncate($Size)
+
+            return $Operator, $Size -join ''
+
         }
-        if ($Value -match '.\.\..')
+        elseif ($Value -match $RangePattern)
         {
-            $Values = $Value -split '\.\.'
+            $Size1 = [double]$Matches.Size1 * "1$($Matches.Multiplier1)"
+            $Size1 = [Math]::Truncate($Size1)
+
+            $Size2 = [double]$Matches.Size2 * "1$($Matches.Multiplier2)"
+            $Size2 = [Math]::Truncate($Size2)
+
+            return $Size1, $Size2 -join '..'
+
         }
         else
         {
-            $Values = $Value
+            throw [Management.Automation.ParameterBindingException]::new(
+                "Value '$Value' is not a valid size argument. Provide a value in one of these " +
+                "formats: '>n', '>=n', '<n', '<=n', 'n..n', where 'n' can include a 'MB' or 'GB' " +
+                "suffix."
+            )
         }
-
-        $Values = $Values | ForEach-Object {
-            $Operator, $Size = $_ -split '(?=\d+)', 2
-            if ($Size -match '^\s*(\d+)\s*(MB|GB)?$')
-            {
-                $Size, $Suffix = $Matches[1, 2]
-                $Size = [double]$Size * "1$Suffix"
-                $Size = [Math]::Truncate($Size)
-            }
-            else
-            {
-                throw [Management.Automation.ParameterBindingException]::new(
-                    "Value '$Value' is not a valid size. Provide a numeric value with an optional MB or GB suffix."
-                )
-            }
-
-            $Operator = $Operator.Trim()
-            if ($Operator -notin ('', '>', '>=', '<', '<='))
-            {
-                throw [Management.Automation.ParameterBindingException]::new(
-                    "Operator '$Operator' is invalid. Valid values are: '>', '>=', '<', '<='."
-                )
-            }
-
-            $Operator, $Size -join ''
-        }
-
-        return $Values -join '..'
     }
 }
