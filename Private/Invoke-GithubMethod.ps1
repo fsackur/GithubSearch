@@ -88,7 +88,10 @@ function Invoke-GithubMethod
         ${OutFile},
 
         [switch]
-        ${PassThru}
+        ${PassThru},
+
+        [object]
+        $Token      # Not in PSv5
     )
 
     begin
@@ -103,6 +106,21 @@ function Invoke-GithubMethod
         {
             $Uri = $Uri -replace '^/'
             $PSBoundParameters.Uri = "https://api.github.com/$Uri"
+        }
+
+        if ($Token -and $PSVersionTable.PSVersion -lt ([version]"7.1.2"))
+        {
+            if ($Token -is [securestring])
+            {
+                $Token = $Token | ConvertTo-Plaintext
+            }
+
+            if (-not $Headers)
+            {
+                $PSBoundParameters.Headers = @{}
+            }
+            $PSBoundParameters.Headers.Authorization = $Token
+            [void]$PSBoundParameters.Remove('Token')
         }
         #endregion Inject module defaults
     }
