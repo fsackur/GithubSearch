@@ -13,6 +13,7 @@
     GUID                 = '3a200fc7-45c4-4929-a16f-c586e11fa213'
 
     RootModule           = 'GithubSearch.psm1'
+    NestedModules        = @('Class/SizeAttribute.psm1')
 
     RequiredModules      = @()
 

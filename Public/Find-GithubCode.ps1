@@ -1,3 +1,4 @@
+using module ../Class/SizeAttribute.psm1
 
 function Find-GithubCode
 {
@@ -21,7 +22,7 @@ function Find-GithubCode
 
         [string]$Language,
 
-        [Size()]
+        [SizeAttribute()]
         [string]$Size
     )
 
