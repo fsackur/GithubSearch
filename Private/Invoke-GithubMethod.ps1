@@ -105,10 +105,10 @@ function Invoke-GithubMethod
         if (-not $Uri.IsAbsoluteUri)
         {
             $Uri = $Uri -replace '^/'
-            $PSBoundParameters.Uri = "https://api.github.com/$Uri"
+            $PSBoundParameters.Uri = "https://github.com/$Uri"
         }
 
-        if ($Token -and $PSVersionTable.PSVersion -lt ([version]"7.1.2"))
+        if ($Token)
         {
             if ($Token -is [securestring])
             {
@@ -119,7 +119,7 @@ function Invoke-GithubMethod
             {
                 $PSBoundParameters.Headers = @{}
             }
-            $PSBoundParameters.Headers.Authorization = $Token
+            $PSBoundParameters.Headers.Authorization = "token $Token"
             [void]$PSBoundParameters.Remove('Token')
         }
         #endregion Inject module defaults
