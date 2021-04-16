@@ -27,21 +27,6 @@ function Find-GithubCode
         [string]$Size
     )
 
-    if (-not $COMMON_PARAMETERS)
-    {
-        $Script:COMMON_PARAMETERS = [System.Collections.Generic.HashSet[string]]::new()
-
-        $CommonParamClasses = (
-            [Management.Automation.Internal.CommonParameters],
-            [Management.Automation.Internal.ShouldProcessParameters],
-            [Management.Automation.Internal.TransactionParameters]
-        )
-        $CommonParamClasses |
-            ForEach-Object {$_.GetProperties()} |
-            Select-Object -ExpandProperty Name |
-            ForEach-Object {$COMMON_PARAMETERS.Add($_)} |
-            Out-Null
-    }
 
     if ($User -and $Org)
     {
