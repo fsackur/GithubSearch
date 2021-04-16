@@ -42,14 +42,25 @@ function Find-GithubCode
     {
         if ($User -and $Org)
         {
-            throw
+            throw [Management.Automation.ParameterBindingException]::new(
+                "You cannot use 'User' and 'Org' together."
+            )
         }
 
-        if ($Repo -and $Repo -notmatch '/' -and -not ($User -or $Org))
+        if ($Repo -and $Repo -notmatch '/')
         {
-            # throw
+            if ($User -or $Org)
+            {
+                # We've already validated that we don't have both User and Org
+                $Repo = "$User$Org/$Repo"
+            }
+            else
+            {
+                throw [Management.Automation.ParameterBindingException]::new(
+                    "The 'Repo' parameter requires qualification. Either provide a value in the format 'fsackur/GithubSearch' or supply a value to the 'User' or 'Org' parameter."
+                )
+            }
         }
-
 
         $Params = $MyInvocation.MyCommand.Parameters.Values | Where-Object {$_.Name -notin $COMMON_PARAMETERS}
 
