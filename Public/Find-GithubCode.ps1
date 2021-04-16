@@ -1,4 +1,5 @@
-using module ../Class/SizeAttribute.psm1
+
+# using module @{ModuleName = 'SizeAttribute'; MaximumVersion = '9.9.9.9'}
 
 function Find-GithubCode
 {
