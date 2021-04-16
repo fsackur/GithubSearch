@@ -14,8 +14,8 @@ function Set-Context
         $Script:Config = Import-Configuration
     }
 
-    $HashCode = ($Config | ConvertTo-Json -Compress).GetHashCode()
-    $Context  = $null
+    $ShouldWrite = $false
+    $Context     = $null
 
 
     # Normalise URI
@@ -39,7 +39,7 @@ function Set-Context
 
     if ($Server -and $Config.CurrentContext -ne $Server.Authority)
     {
-        $Config.CurrentContext = $Server.Authority
+        $ShouldWrite = $Config.CurrentContext = $Server.Authority
     }
 
 
@@ -47,17 +47,17 @@ function Set-Context
     if (-not $Context)
     {
         $Context = @{Server = $Server}
-        $Config.Contexts[$Server.Authority] = $Context
+        $ShouldWrite = $Config.Contexts[$Server.Authority] = $Context
     }
 
 
     if ($Token)
     {
-        $Context.Token = $Token
+        $ShouldWrite = $Context.Token = $Token
     }
 
 
-    if ($HashCode -ne ($Config | ConvertTo-Json -Compress).GetHashCode())
+    if ($ShouldWrite)
     {
         Export-Configuration $Config
     }
