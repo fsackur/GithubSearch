@@ -105,7 +105,13 @@ function Invoke-GithubMethod
         if (-not $Uri.IsAbsoluteUri)
         {
             $Uri = $Uri -replace '^/'
-            $PSBoundParameters.Uri = "https://github.com/$Uri"
+            $Server = Get-Context -Server
+            $PSBoundParameters.Uri = [uri]($Server, $Uri -join '/')
+        }
+
+        if (-not ($Token -or $Headers.Authorization))
+        {
+            $Token = Get-Context -Token
         }
 
         if ($Token)
@@ -117,9 +123,9 @@ function Invoke-GithubMethod
 
             if (-not $Headers)
             {
-                $PSBoundParameters.Headers = @{}
+                $PSBoundParameters.Headers = $Headers = @{}
             }
-            $PSBoundParameters.Headers.Authorization = "token $Token"
+            $Headers.Authorization = "token $Token"
             [void]$PSBoundParameters.Remove('Token')
         }
         #endregion Inject module defaults

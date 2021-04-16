@@ -15,7 +15,12 @@
     RootModule           = 'GithubSearch.psm1'
     NestedModules        = @('Class/SizeAttribute.psm1')
 
-    RequiredModules      = @()
+    RequiredModules      = @(
+        @{
+            ModuleName    = 'Configuration'
+            ModuleVersion = '1.3.1'
+        }
+    )
 
     FunctionsToExport    = @(
         '*'
