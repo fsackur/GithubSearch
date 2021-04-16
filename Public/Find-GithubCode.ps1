@@ -28,36 +28,49 @@ function Find-GithubCode
     )
 
 
-    if ($User -and $Org)
+    dynamicparam
     {
-        throw
+        Get-ContextParameters
     }
 
-    if ($Repo -and $Repo -notmatch '/' -and -not ($User -or $Org))
+    begin
     {
-        # throw
+        Set-Context
     }
 
-
-    $Params = $MyInvocation.MyCommand.Parameters.Values | Where-Object {$_.Name -notin $COMMON_PARAMETERS}
-
-    $SearchTerms = [Collections.Generic.List[string]]::new()
-    foreach ($Param in $Params)
+    end
     {
-        $Name  = $Param.Name
-        $Value = Get-Variable $Name -ValueOnly -ErrorAction SilentlyContinue
-
-        if ($Name -eq 'Keyword')
+        if ($User -and $Org)
         {
-            $SearchTerms.AddRange($Value)
+            throw
         }
-        elseif ($Value)
-        {
-            $Term = "{0}:{1}" -f $Name.ToLower(), $Value
-            $SearchTerms.Add($Term)
-        }
-    }
 
-    $Uri = "/search/code?q=$($SearchTerms -join '+')"
-    Invoke-GithubMethod $Uri
+        if ($Repo -and $Repo -notmatch '/' -and -not ($User -or $Org))
+        {
+            # throw
+        }
+
+
+        $Params = $MyInvocation.MyCommand.Parameters.Values | Where-Object {$_.Name -notin $COMMON_PARAMETERS}
+
+        $SearchTerms = [Collections.Generic.List[string]]::new()
+        foreach ($Param in $Params)
+        {
+            $Name  = $Param.Name
+            $Value = Get-Variable $Name -ValueOnly -ErrorAction SilentlyContinue
+
+            if ($Name -eq 'Keyword')
+            {
+                $SearchTerms.AddRange($Value)
+            }
+            elseif ($Value)
+            {
+                $Term = "{0}:{1}" -f $Name.ToLower(), $Value
+                $SearchTerms.Add($Term)
+            }
+        }
+
+        $Uri = "/search/code?q=$($SearchTerms -join '+')"
+        Invoke-GithubMethod $Uri
+    }
 }
